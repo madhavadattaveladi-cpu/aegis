@@ -43,6 +43,11 @@ class Settings(BaseSettings):
     # Storage
     output_dir: Path = Path("data/output")
 
+    # Verbosity: when False (default), only warnings/errors are shown so the
+    # assistant conversation stays clean. Set true (or use --verbose) to see
+    # the step-by-step thinking process and HTTP logs.
+    verbose: bool = False
+
     def ensure_dirs(self) -> None:
         """Create directories the app expects to exist."""
         self.output_dir.mkdir(parents=True, exist_ok=True)

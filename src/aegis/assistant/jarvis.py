@@ -11,7 +11,7 @@ from aegis.agents.agent import Agent
 from aegis.assistant.tools import build_assistant_tools
 from aegis.llm.factory import build_llm
 from aegis.utils.config import get_settings
-from aegis.utils.logging import console, get_logger
+from aegis.utils.logging import console, get_logger, set_verbose
 
 log = get_logger(__name__)
 
@@ -52,7 +52,8 @@ def run_repl(use_voice: bool = False) -> None:
             console.print(f"[yellow]Voice unavailable ({exc}); falling back to text.[/yellow]")
 
     console.print("[bold cyan]Jarvis is online.[/bold cyan] "
-                  "Type 'exit' or 'quit' to leave.\n")
+                  "Type 'exit' to leave, '/verbose' to see the thinking "
+                  "process, '/quiet' to hide it.\n")
 
     while True:
         try:
@@ -70,6 +71,17 @@ def run_repl(use_voice: bool = False) -> None:
             console.print("[cyan]Goodbye![/cyan]")
             break
         if not user_input.strip():
+            continue
+
+        # In-chat verbosity toggle: type /verbose or /quiet at any time.
+        cmd = user_input.strip().lower()
+        if cmd in {"/verbose", "/debug"}:
+            set_verbose(True)
+            console.print("[dim]Verbose mode ON — showing the thinking process.[/dim]\n")
+            continue
+        if cmd in {"/quiet", "/clean"}:
+            set_verbose(False)
+            console.print("[dim]Verbose mode OFF — hiding the thinking process.[/dim]\n")
             continue
 
         reply = agent.run(user_input)

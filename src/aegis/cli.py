@@ -23,7 +23,7 @@ from aegis.seriesscout.scout import scout as run_scout
 from aegis.tracker.bookmarks import add_bookmark, load_bookmarks, remove_bookmark
 from aegis.tracker.engine import check_updates
 from aegis.utils.config import get_settings
-from aegis.utils.logging import console
+from aegis.utils.logging import console, set_verbose
 
 
 def _cmd_scrape(args: argparse.Namespace) -> int:
@@ -147,6 +147,10 @@ def _cmd_info(_: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="aegis", description="Agentic scraping + AI assistant")
+    parser.add_argument(
+        "--verbose", "-v", action="store_true",
+        help="Show the detailed thinking process (step-by-step tool calls and HTTP logs).",
+    )
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_scrape = sub.add_parser("scrape", help="Scrape one or more URLs")
@@ -249,6 +253,11 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    # Apply verbosity: the --verbose flag overrides the config/.env default.
+    if getattr(args, "verbose", False):
+        set_verbose(True)
+    else:
+        set_verbose(get_settings().verbose)
     return int(args.func(args))
 
 
